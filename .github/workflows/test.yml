@@ -1,13 +1,16 @@
 name: Test App
 
-strategy:
-  matrix:
-    node-version: [16.x, 18.x]
+on:
+  push:
+    branches: [main]
 
-on: [push]
+  workflow_dispatch:
 
 jobs:
-  Test:
+  test:
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3

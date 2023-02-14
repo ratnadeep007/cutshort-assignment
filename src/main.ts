@@ -14,6 +14,8 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('todo')
     .addTag('auth')
+    .addTag('post')
+    .addTag('user')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);

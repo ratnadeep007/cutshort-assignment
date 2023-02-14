@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  Inject,
   Param,
   Patch,
   Post,
@@ -28,8 +30,10 @@ import { Todo } from '../schemas/todo.schema';
 @ApiBearerAuth()
 @Controller('todo')
 export class TodoController {
-  constructor(private readonly todoService: TodoService) {}
+  @Inject()
+  private readonly todoService: TodoService;
 
+  @HttpCode(201)
   @Post()
   @UseGuards(AccessTokenGuard)
   @ApiCreatedResponse({ description: 'Created Succesfully', type: Todo })

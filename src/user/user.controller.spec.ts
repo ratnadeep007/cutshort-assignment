@@ -1,31 +1,29 @@
+import { MongooseModule } from '@nestjs/mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserDto } from '../dto/user.dto';
+import { PostModule } from '../post/post.module';
+import {
+  closeInMongodConnection,
+  rootMongooseTestModule,
+} from '../mock/mongoMock';
+import { UserSchema } from '../schemas/user.schema';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 
 describe('UserController', () => {
   let controller: UserController;
-  let service: UserService;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [UserController],
-      providers: [
-        {
-          provide: UserService,
-          useValue: {
-            createUser: jest.fn().mockImplementation(() =>
-              Promise.resolve({
-                username: 'some user',
-              }),
-            ),
-          },
-        },
+      imports: [
+        rootMongooseTestModule(),
+        MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
+        PostModule,
       ],
+      controllers: [UserController],
+      providers: [UserService],
     }).compile();
 
     controller = module.get<UserController>(UserController);
-    service = module.get<UserService>(UserService);
   });
 
   it('should be defined', () => {
@@ -39,5 +37,9 @@ describe('UserController', () => {
     // };
     // const conUser = await controller.registerUser(newUser);
     // expect(conUser.username).toBe('some user');
+  });
+
+  afterAll(async () => {
+    await closeInMongodConnection();
   });
 });

@@ -32,12 +32,16 @@ describe('TodoService', () => {
     const newTodo = await service.create(
       {
         title: 'some todo',
+        user: '',
+        isComplete: false,
       },
       userId,
     );
     await service.create(
       {
         title: 'some todo 2',
+        user: '',
+        isComplete: false,
       },
       userId,
     );

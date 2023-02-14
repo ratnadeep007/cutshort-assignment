@@ -7,6 +7,7 @@ import {
 } from '../mock/mongoMock';
 import { PostController } from './post.controller';
 import { PostService } from './post.service';
+import { CacheModule } from '@nestjs/common';
 
 describe('PostController', () => {
   let controller: PostController;
@@ -16,6 +17,7 @@ describe('PostController', () => {
       imports: [
         rootMongooseTestModule(),
         MongooseModule.forFeature([{ name: 'Post', schema: PostSchema }]),
+        CacheModule.register(),
       ],
       controllers: [PostController],
       providers: [PostService],

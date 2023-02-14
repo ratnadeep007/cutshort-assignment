@@ -20,6 +20,7 @@ export class CreateUserDto {
   @ApiProperty({
     type: String,
     required: false,
+    readOnly: true,
   })
   refreshToken?: string;
 }

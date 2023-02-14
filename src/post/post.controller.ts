@@ -1,10 +1,12 @@
 import {
   Body,
+  CACHE_MANAGER,
   Controller,
   Get,
   HttpCode,
   Inject,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -12,6 +14,7 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiQuery,
   ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -21,12 +24,18 @@ import { PostService } from './post.service';
 import { Request } from 'express';
 import { AccessTokenGuard } from '../common/guards/accessToken.guard';
 import { AddCommentDto } from '../dto/add-comment.dto';
+import { PaginationParams } from '../common/models/paginationParams';
+import { Cache } from 'cache-manager';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('post')
 @Controller('post')
 export class PostController {
   @Inject()
   private readonly postService: PostService;
+
+  @Inject(CACHE_MANAGER)
+  private cacheManager: Cache;
 
   @HttpCode(201)
   @Post()
@@ -58,7 +67,23 @@ export class PostController {
 
   @Get()
   @ApiResponse({ status: 200, description: 'All posts' })
-  getAllPost() {
-    return this.postService.getAllPosts();
+  @Throttle(5, 10)
+  @ApiQuery({ name: 'skip', description: 'Documents to skip', required: false })
+  @ApiQuery({
+    name: 'limit',
+    description: 'Limit number of documents to return',
+    required: false,
+  })
+  async getAllPost(@Query() { skip, limit }: PaginationParams) {
+    const fromCache = await this.cacheManager.get(
+      `posts?skip=${skip}&limit=${limit}`,
+    );
+    if (!fromCache) {
+      const data = await this.postService.getAllPosts(skip, limit);
+      await this.cacheManager.set(`posts?skip=${skip}&limit=${limit}`, data);
+      return data;
+    } else {
+      return fromCache;
+    }
   }
 }

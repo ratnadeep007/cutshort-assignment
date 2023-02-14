@@ -31,8 +31,14 @@ export class PostService {
     }
   }
 
-  async getAllPosts() {
-    return this.postModel.find();
+  async getAllPosts(documentsToSkip = 0, limitOfDocuments?: number) {
+    const query = this.postModel.find().sort({ _id: 1 }).skip(documentsToSkip);
+    if (limitOfDocuments) {
+      query.limit(limitOfDocuments);
+    }
+    const results = await query;
+    const count = await this.postModel.count();
+    return { results, count };
   }
 
   async getUserPosts(userId: string) {

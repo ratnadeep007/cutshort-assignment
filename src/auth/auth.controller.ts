@@ -22,9 +22,11 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 
 @ApiTags('auth')
 @Controller('auth')
+@SkipThrottle()
 export class AuthController {
   @Inject()
   private authService: AuthService;
@@ -64,6 +66,7 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(RefreshTokenGuard)
   @Get('refresh')
+  @SkipThrottle(false)
   @ApiResponse({
     status: 200,
     description:

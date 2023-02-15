@@ -23,10 +23,10 @@ import { AccessTokenGuard } from '../common/guards/accessToken.guard';
 import { PostService } from '../post/post.service';
 import { UserService } from './user.service';
 import { Request } from 'express';
-import { Role } from 'src/common/entities/role.enum';
-import { RolesGuard } from 'src/common/guards/roles.guard';
-import { Roles } from 'src/common/decorators/roles.decorator';
-import { UpdateUserResponseDto } from 'src/dto/update-user.dto';
+import { Role } from '../common/entities/role.enum';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { UpdateUserResponseDto } from '../dto/update-user.dto';
 
 @ApiTags('user')
 @Controller('user')

@@ -17,10 +17,5 @@ export class CreateUserDto {
   })
   password: string;
   @IsOptional()
-  @ApiProperty({
-    type: String,
-    required: false,
-    readOnly: true,
-  })
   refreshToken?: string;
 }

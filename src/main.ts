@@ -1,4 +1,4 @@
-import { ValidationPipe } from '@nestjs/common';
+import { HttpStatus, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
@@ -9,7 +9,7 @@ const swaggerUISecure = (req: Request, res: Response, next: NextFunction) => {
     const query = req.query;
     console.log(query['pin']);
     if (query['pin'] !== process.env.SWAGGER_PIN) {
-      return res.send({ message: 'You are not allowed to view this' });
+      return res.status(HttpStatus.FORBIDDEN).send({ message: 'Forbidden' });
     }
   }
   next();

@@ -1,8 +1,32 @@
-import { Controller, Get, Inject, Query, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Param,
+  Patch,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiQuery,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { CreateUserDto } from 'src/dto/create-user.dto';
 import { AccessTokenGuard } from '../common/guards/accessToken.guard';
 import { PostService } from '../post/post.service';
 import { UserService } from './user.service';
+import { Request } from 'express';
+import { Role } from 'src/common/entities/role.enum';
+import { RolesGuard } from 'src/common/guards/roles.guard';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { UpdateUserResponseDto } from 'src/dto/update-user.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -26,5 +50,29 @@ export class UserController {
       username: userDetail.username,
       posts: userPosts,
     };
+  }
+
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.USER)
+  @Patch('/:id')
+  @ApiBearerAuth()
+  @ApiOkResponse({
+    description:
+      'Update user of given id if and only if it belongs to logged in user or user with admin role',
+    type: UpdateUserResponseDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized Request' })
+  async updateUser(
+    @Body() createUserDto: CreateUserDto & { role: string },
+    @Param() params: { id: string },
+    @Req() req: Request,
+  ) {
+    const user = await this.userService.findById(params.id);
+    const role = req.user['role'];
+    const userId = req.user['sub'];
+    if (role === Role.USER && userId !== user._id.toString()) {
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
+    return this.userService.update(params.id, createUserDto);
   }
 }

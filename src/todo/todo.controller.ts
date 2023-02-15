@@ -4,6 +4,8 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
+  HttpStatus,
   Inject,
   Param,
   Patch,
@@ -25,6 +27,9 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Todo } from '../schemas/todo.schema';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Role } from '../common/entities/role.enum';
+import { Roles } from '../common/decorators/roles.decorator';
 
 @ApiTags('todo')
 @ApiBearerAuth()
@@ -81,20 +86,26 @@ export class TodoController {
     return this.todoService.delete(params.id, userId);
   }
 
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.USER)
   @Patch('/:id')
-  @UseGuards(AccessTokenGuard)
   @ApiOkResponse({
     description:
-      'Update todo of given id if and only if it belongs to logged in user',
+      'Update todo of given id if and only if it belongs to logged in user or user with admin role',
     type: UpdateTodoDto,
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized Request' })
-  updateTodo(
+  async updateTodo(
     @Req() req: Request,
     @Param() params: { id: string },
     @Body() updateTodo: UpdateTodoDto,
   ) {
+    const todo = await this.todoService.findById(params.id);
+    const role = req.user['role'];
     const userId = req.user['sub'];
+    if (role === Role.USER && userId !== todo.user.toString()) {
+      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+    }
     return this.todoService.update(params.id, updateTodo, userId);
   }
 }

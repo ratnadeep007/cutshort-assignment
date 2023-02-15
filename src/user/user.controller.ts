@@ -1,5 +1,5 @@
 import { Controller, Get, Inject, Query, UseGuards } from '@nestjs/common';
-import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AccessTokenGuard } from '../common/guards/accessToken.guard';
 import { PostService } from '../post/post.service';
 import { UserService } from './user.service';
@@ -14,6 +14,7 @@ export class UserController {
 
   @Get()
   @UseGuards(AccessTokenGuard)
+  @ApiBearerAuth()
   @ApiQuery({ name: 'username', required: true, type: String })
   async findUser(@Query() query: { username: string }) {
     const userDetail = await this.userService.findByUsername(query.username);

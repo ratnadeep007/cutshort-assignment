@@ -42,6 +42,10 @@ export class TodoService {
     return todo.save();
   }
 
+  async findById(id: string) {
+    return this.todoModel.findById(id);
+  }
+
   async delete(id: string, userId: string) {
     return this.todoModel.deleteOne({ _id: id, user: userId }).exec();
   }
